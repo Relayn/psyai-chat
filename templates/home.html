@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - PsyAI{% endblock %}
+
+{% block content %}
+    <h1>Добро пожаловать в PsyAI</h1>
+    <p>Ваш личный помощник для психологической поддержки на основе ИИ.</p>
+    {% if not user.is_authenticated %}
+        <p>Пожалуйста, <a href="{% url 'login' %}">войдите</a> или <a href="{% url 'signup' %}">зарегистрируйтесь</a>, чтобы начать.</p>
+    {% else %}
+        <p>Перейдите в <a href="{% url 'profile' %}">личный кабинет</a>, чтобы начать чат.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,60 @@
+[tool.poetry]
+name = "psyai-chat"
+version = "0.1.0"
+description = "Django-based AI chat for psychological support (MVP)"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+package-mode = false  # <-- ДОБАВЬТЕ ЭТУ СТРОКУ
+
+[tool.poetry.dependencies]
+python = "^3.11"
+# ... остальные зависимости остаются без изменений ...
+django = "^5.0.6"
+channels = "^4.0.0"
+psycopg2-binary = "^2.9.9"
+django-environ = "^0.11.2"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.1"
+pytest-django = "^4.8.0"
+ruff = "^0.4.4"
+black = "^24.4.2"
+pre-commit = "^3.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.main:api"
+
+# --- Инструменты форматирования и линтинга ---
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.ruff]
+# Эта секция остается для ruff-format
+line-length = 88
+
+[tool.ruff.lint]
+# Новая, правильная секция для линтера
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "UP", # pyupgrade
+]
+
+# Исключаем папки, которые не нужно проверять
+exclude = [
+    "migrations",
+]
+
+# --- Настройки Pytest ---
+[tool.pytest.ini_options]
+# Указываем путь к настройкам Django
+DJANGO_SETTINGS_MODULE = "config.settings"
+# Указываем шаблоны имен файлов, в которых нужно искать тесты
+python_files = ["tests.py", "test_*.py", "*_tests.py"]

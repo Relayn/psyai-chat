@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Сервис нашего Django-приложения
+  app:
+    build: .
+    container_name: psyai_app
+    # Команда для запуска dev-сервера Django.
+    # Мы еще не создали проект, но скоро создадим.
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      # Синхронизируем текущую папку с папкой /app в контейнере
+      # Это позволяет видеть изменения в коде без пересборки образа
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # Сервис базы данных PostgreSQL
+  db:
+    image: postgres:15
+    container_name: psyai_db
+    volumes:
+      # Сохраняем данные БД между перезапусками контейнера
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      # Эти переменные должны совпадать с теми, что в DATABASE_URL
+      POSTGRES_USER: psyai_user
+      POSTGRES_PASSWORD: psyai_password
+      POSTGRES_DB: psyai_db
+    ports:
+      # Открываем порт 5432 для возможного подключения к БД с хост-машины
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
