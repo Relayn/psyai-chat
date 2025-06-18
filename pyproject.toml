@@ -9,9 +9,9 @@ package-mode = false  # <-- ДОБАВЬТЕ ЭТУ СТРОКУ
 
 [tool.poetry.dependencies]
 python = "^3.11"
-# ... остальные зависимости остаются без изменений ...
 django = "^5.0.6"
 channels = "^4.0.0"
+daphne = "^4.1.2"
 psycopg2-binary = "^2.9.9"
 django-environ = "^0.11.2"
 python-dotenv = "^1.0.1"

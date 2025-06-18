@@ -7,7 +7,7 @@ services:
     container_name: psyai_app
     # Команда для запуска dev-сервера Django.
     # Мы еще не создали проект, но скоро создадим.
-    command: python manage.py runserver 0.0.0.0:8000
+    command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
     volumes:
       # Синхронизируем текущую папку с папкой /app в контейнере
       # Это позволяет видеть изменения в коде без пересборки образа

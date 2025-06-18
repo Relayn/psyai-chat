@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Чат с ИИ-психологом{% endblock %}
+
+{% block content %}
+<style>
+    #chat-log {
+        height: 400px;
+        border: 1px solid #ccc;
+        padding: 1rem;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+    }
+    .message {
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        max-width: 70%;
+        word-wrap: break-word;
+    }
+    .user-message {
+        background-color: #c3dafe;
+        align-self: flex-end;
+        text-align: right;
+    }
+    .ai-message {
+        background-color: #e9ecef;
+        align-self: flex-start;
+        text-align: left;
+    }
+    #chat-form {
+        display: flex;
+        gap: 1rem;
+    }
+    #chat-message-input {
+        flex-grow: 1;
+    }
+</style>
+
+<h2>Чат с ИИ-психологом</h2>
+<div id="chat-log">
+    <!-- Сообщения будут добавляться сюда через JS -->
+</div>
+<form id="chat-form">
+    <input id="chat-message-input" type="text" autocomplete="off" placeholder="Введите ваше сообщение...">
+    <button id="chat-message-submit" type="submit">Отправить</button>
+</form>
+
+<script>
+    const chatLog = document.querySelector('#chat-log');
+    const messageInput = document.querySelector('#chat-message-input');
+    const messageSubmit = document.querySelector('#chat-message-submit');
+
+    // --- 1. Установка WebSocket соединения ---
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/'
+    );
+
+    // --- 2. Обработка входящих сообщений ---
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const messageType = data.type;
+
+        if (messageType === 'chat.message') {
+            const sender = data.payload.sender;
+            const text = data.payload.text;
+            
+            // Создаем новый div для сообщения
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.textContent = text;
+
+            // Стилизуем в зависимости от отправителя
+            if (sender === 'USER') {
+                messageElement.classList.add('user-message');
+            } else {
+                messageElement.classList.add('ai-message');
+            }
+            
+            chatLog.appendChild(messageElement);
+            // Прокручиваем вниз
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+    };
+
+    // --- 3. Обработка закрытия соединения ---
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+        const errorElement = document.createElement('div');
+        errorElement.textContent = 'Соединение с сервером потеряно. Пожалуйста, обновите страницу.';
+        errorElement.style.color = 'red';
+        chatLog.appendChild(errorElement);
+    };
+
+    // --- 4. Отправка сообщения ---
+    document.querySelector('#chat-form').onsubmit = function(e) {
+        e.preventDefault(); // Предотвращаем перезагрузку страницы
+        
+        const message = messageInput.value;
+        if (message.trim() === '') {
+            return; // Не отправляем пустые сообщения
+        }
+
+        // Отправляем сообщение на сервер в формате JSON
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+
+        // Отображаем сообщение пользователя сразу
+        const userMessageElement = document.createElement('div');
+        userMessageElement.classList.add('message', 'user-message');
+        userMessageElement.textContent = message;
+        chatLog.appendChild(userMessageElement);
+        chatLog.scrollTop = chatLog.scrollHeight;
+
+        // Очищаем поле ввода
+        messageInput.value = '';
+    };
+
+    // Фокус на поле ввода при загрузке страницы
+    messageInput.focus();
+</script>
+{% endblock %}

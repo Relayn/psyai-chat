@@ -48,12 +48,15 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     "core.apps.CoreConfig",
     "users.apps.UsersConfig",
+    "chat.apps.ChatConfig",
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
 ]
 
 MIDDLEWARE = [
@@ -133,3 +136,8 @@ AUTH_USER_MODEL = "users.User"
 # --- 10. Настройки редиректов после входа/выхода ---
 LOGIN_REDIRECT_URL = "profile"  # Имя маршрута для перенаправления после входа
 LOGOUT_REDIRECT_URL = "home"  # Имя маршрута для перенаправления после выхода
+
+# --- 11. Настройка ASGI и Channels ---
+# Указываем Django, где находится наше основное ASGI-приложение.
+# Это необходимо для работы Django Channels.
+ASGI_APPLICATION = "config.asgi.application"
