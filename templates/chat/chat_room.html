@@ -31,6 +31,14 @@
         align-self: flex-start;
         text-align: left;
     }
+    /* --- НОВОЕ: Стили для системных сообщений --- */
+    .system-message {
+        color: #dc3545; /* Красный цвет для предупреждений */
+        font-style: italic;
+        text-align: center;
+        align-self: center;
+        width: 100%;
+    }
     #chat-form {
         display: flex;
         gap: 1rem;
@@ -53,6 +61,7 @@
     const chatLog = document.querySelector('#chat-log');
     const messageInput = document.querySelector('#chat-message-input');
     const messageSubmit = document.querySelector('#chat-message-submit');
+    const chatForm = document.querySelector('#chat-form');
 
     // --- 1. Установка WebSocket соединения ---
     const chatSocket = new WebSocket(
@@ -67,60 +76,78 @@
         if (messageType === 'chat.message') {
             const sender = data.payload.sender;
             const text = data.payload.text;
-            
-            // Создаем новый div для сообщения
+
             const messageElement = document.createElement('div');
             messageElement.classList.add('message');
             messageElement.textContent = text;
 
-            // Стилизуем в зависимости от отправителя
             if (sender === 'USER') {
                 messageElement.classList.add('user-message');
             } else {
                 messageElement.classList.add('ai-message');
             }
-            
+
             chatLog.appendChild(messageElement);
-            // Прокручиваем вниз
-            chatLog.scrollTop = chatLog.scrollHeight;
+
+        // --- НОВОЕ: Обработка сообщения о достижении лимита ---
+        } else if (messageType === 'limit.reached') {
+            const limitText = data.payload.message;
+
+            const systemMessageElement = document.createElement('div');
+            systemMessageElement.classList.add('system-message');
+            systemMessageElement.textContent = limitText;
+            chatLog.appendChild(systemMessageElement);
+
+            // Блокируем форму отправки
+            messageInput.disabled = true;
+            messageInput.placeholder = "Сессия завершена. Обновите страницу, чтобы начать новую.";
+            messageSubmit.disabled = true;
         }
+
+        // Прокручиваем вниз при любом новом сообщении
+        chatLog.scrollTop = chatLog.scrollHeight;
     };
 
     // --- 3. Обработка закрытия соединения ---
     chatSocket.onclose = function(e) {
-        console.error('Chat socket closed unexpectedly');
-        const errorElement = document.createElement('div');
-        errorElement.textContent = 'Соединение с сервером потеряно. Пожалуйста, обновите страницу.';
-        errorElement.style.color = 'red';
-        chatLog.appendChild(errorElement);
+        console.error('Chat socket closed.', e);
+
+        // --- НОВОЕ: Улучшенное сообщение о закрытии ---
+        // Если форма еще не заблокирована, значит, это неожиданное закрытие.
+        if (!messageInput.disabled) {
+            const errorElement = document.createElement('div');
+            errorElement.classList.add('system-message');
+            errorElement.textContent = 'Соединение с сервером потеряно. Пожалуйста, обновите страницу.';
+            chatLog.appendChild(errorElement);
+
+            // Блокируем форму
+            messageInput.disabled = true;
+            messageSubmit.disabled = true;
+        }
     };
 
     // --- 4. Отправка сообщения ---
-    document.querySelector('#chat-form').onsubmit = function(e) {
-        e.preventDefault(); // Предотвращаем перезагрузку страницы
-        
+    chatForm.onsubmit = function(e) {
+        e.preventDefault();
+
         const message = messageInput.value;
         if (message.trim() === '') {
-            return; // Не отправляем пустые сообщения
+            return;
         }
 
-        // Отправляем сообщение на сервер в формате JSON
         chatSocket.send(JSON.stringify({
             'message': message
         }));
 
-        // Отображаем сообщение пользователя сразу
         const userMessageElement = document.createElement('div');
         userMessageElement.classList.add('message', 'user-message');
         userMessageElement.textContent = message;
         chatLog.appendChild(userMessageElement);
         chatLog.scrollTop = chatLog.scrollHeight;
 
-        // Очищаем поле ввода
         messageInput.value = '';
     };
 
-    // Фокус на поле ввода при загрузке страницы
     messageInput.focus();
 </script>
 {% endblock %}

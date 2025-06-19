@@ -9,18 +9,22 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 
 import os
 
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
-# Импортируем маршруты нашего приложения chat
-import chat.routing
-
+# --- 1. Сначала конфигурируем Django ---
+# Эта строка говорит Django, где найти файл настроек.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-
-# Получаем стандартное ASGI-приложение для обработки HTTP-запросов
+# Эта функция выполняет всю магию по настройке Django.
 django_asgi_app = get_asgi_application()
 
+# --- 2. И только ПОСЛЕ этого импортируем код наших приложений ---
+# Теперь, когда Django настроен, эти импорты будут работать безопасно.
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+import chat.routing
+
+
+# --- 3. Собираем итоговое приложение ---
 # ProtocolTypeRouter будет проверять тип входящего соединения
 # и направлять его в соответствующий обработчик.
 application = ProtocolTypeRouter(
