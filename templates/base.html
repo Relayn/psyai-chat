@@ -11,6 +11,20 @@
         nav a:hover { background-color: #9a8c98; border-radius: 5px; }
         .main-content { max-width: 960px; margin: 2rem auto; padding: 2rem; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .auth-links a { margin-left: 1rem; }
+        /* --- СТИЛИ ДЛЯ КНОПКИ ВЫХОДА --- */
+        .logout-form { display: inline; margin: 0; padding: 0; }
+        .logout-button {
+            background: none;
+            border: none;
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-family: sans-serif;
+            font-size: inherit;
+            cursor: pointer;
+        }
+        .logout-button:hover { background-color: #9a8c98; border-radius: 5px; }
+        /* --- КОНЕЦ СТИЛЕЙ --- */
         form { display: flex; flex-direction: column; gap: 1rem; }
         input { padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px; }
         button { padding: 0.8rem 1.5rem; background-color: #22223b; color: white; border: none; border-radius: 4px; cursor: pointer; }
@@ -27,7 +41,11 @@
                 {% if user.is_authenticated %}
                     <span>Привет, {{ user.username }}!</span>
                     <a href="{% url 'profile' %}">Личный кабинет</a>
-                    <a href="{% url 'logout' %}">Выйти</a>
+                    <!-- --- ИЗМЕНЕНО: Ссылка выхода теперь является формой --- -->
+                    <form class="logout-form" action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-button">Выйти</button>
+                    </form>
                 {% else %}
                     <a href="{% url 'login' %}">Войти</a>
                     <a href="{% url 'signup' %}">Регистрация</a>

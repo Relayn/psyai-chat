@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "core.apps.CoreConfig",
     "users.apps.UsersConfig",
     "chat.apps.ChatConfig",
+    "mocks.apps.MocksConfig",
     "channels",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -124,6 +126,12 @@ USE_TZ = True
 STATIC_URL = "static/"
 # Директория, куда `collectstatic` будет собирать все статические файлы для продакшена.
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# --- 7.1. Медиафайлы (Загрузки пользователей) ---
+# URL, по которому будут доступны медиафайлы в браузере.
+MEDIA_URL = "/media/"
+# Абсолютный путь к папке, где Django будет хранить загруженные файлы.
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 # --- 8. Настройки по умолчанию для моделей ---

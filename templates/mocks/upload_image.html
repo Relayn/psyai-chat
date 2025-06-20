@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Анализ изображения{% endblock %}
+
+{% block content %}
+    <h2>Анализ изображения (Mock)</h2>
+    <p>Загрузите изображение, чтобы получить имитацию психологического анализа по нему. Это демонстрационная функция.</p>
+
+    <!-- Важно: enctype="multipart/form-data" необходим для загрузки файлов -->
+    <form method="post" enctype="multipart/form-data" style="margin-bottom: 2rem;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Анализировать</button>
+    </form>
+
+    {% if uploaded_file_url %}
+        <hr>
+        <div style="margin-top: 2rem;">
+            <h3>Результаты анализа:</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start;">
+                <div style="flex: 1; min-width: 250px;">
+                    <h4>Ваше изображение:</h4>
+                    <img src="{{ uploaded_file_url }}" alt="Загруженное изображение" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                </div>
+                <div style="flex: 2; min-width: 300px;">
+                    <h4>Заключение PsyAI:</h4>
+                    <p><strong>Доминирующая эмоция:</strong> {{ analysis_result.dominant_emotion }}</p>
+                    <p><strong>Уверенность анализа:</strong> {{ analysis_result.confidence }}%</p>
+                    <p><strong>Рекомендация:</strong> {{ analysis_result.recommendation }}</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
