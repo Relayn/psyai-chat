@@ -29,6 +29,40 @@
         input { padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px; }
         button { padding: 0.8rem 1.5rem; background-color: #22223b; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #4a4e69; }
+        form-field {
+            /* Причина: Используем CSS Grid для создания идеальной двухколоночной сетки. */
+            display: grid;
+            grid-template-columns: 180px 1fr; /* Фиксированная ширина для метки, остальное — под поле ввода */
+            gap: 1rem; /* Пространство между меткой и полем */
+            align-items: start; /* Выравниваем по верху, чтобы длинные метки не ломали верстку */
+            margin-bottom: 1rem; /* Отступ между рядами формы */
+        }
+        .form-field label {
+            /* Причина: Выравниваем текст метки по правому краю для аккуратности. */
+            text-align: right;
+            padding-top: 0.8rem; /* Небольшой отступ сверху для вертикального центрирования с полем ввода */
+            font-weight: bold;
+            color: #4a4e69;
+        }
+        .form-field-input-wrapper {
+            /* Причина: Этот контейнер нужен, чтобы подсказки и ошибки отображались под полем ввода. */
+            display: flex;
+            flex-direction: column;
+        }
+        .form-field ul {
+            /* Причина: Django выводит ошибки в виде списка. Убираем стандартные маркеры. */
+            list-style-type: none;
+            padding: 0;
+            margin: 0.5rem 0 0 0;
+            color: #dc3545; /* Красный цвет для ошибок */
+            font-size: 0.9em;
+        }
+        .form-field .helptext {
+            /* Причина: Стилизуем текст-подсказку от Django. */
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -41,7 +75,6 @@
                 {% if user.is_authenticated %}
                     <span>Привет, {{ user.username }}!</span>
                     <a href="{% url 'profile' %}">Личный кабинет</a>
-                    <!-- --- ИЗМЕНЕНО: Ссылка выхода теперь является формой --- -->
                     <form class="logout-form" action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
                         <button type="submit" class="logout-button">Выйти</button>
