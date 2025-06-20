@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
-
 import environ
 
 # --- 1. Настройка Environ ---
@@ -41,8 +40,10 @@ DEBUG = env("DJANGO_DEBUG")
 
 # Список хостов, которые могут обслуживать этот сайт.
 # В режиме DEBUG можно оставить пустым, но для Docker лучше указать.
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+RENDER_HOSTNAME = env("RENDER_EXTERNAL_HOSTNAME", default=None)
+if RENDER_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_HOSTNAME)
 
 # --- 3. Приложения ---
 INSTALLED_APPS = [
@@ -126,6 +127,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 # Директория, куда `collectstatic` будет собирать все статические файлы для продакшена.
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT.mkdir(parents=True, exist_ok=True)
 
 # --- 7.1. Медиафайлы (Загрузки пользователей) ---
 # URL, по которому будут доступны медиафайлы в браузере.
