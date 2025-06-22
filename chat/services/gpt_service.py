@@ -1,4 +1,5 @@
 import os
+import time
 
 from django.conf import settings
 import openai
@@ -7,24 +8,20 @@ import openai
 def get_gpt_response(prompt: str, history: list[dict] = None) -> str:
     """
     Отправляет запрос к API OpenAI и возвращает синхронный ответ.
-
-    Args:
-        prompt: Текст запроса от пользователя.
-        history: Список предыдущих сообщений для сохранения контекста диалога.
-
-    Returns:
-        Строка с ответом от модели GPT.
+    Включает mock-режим, если API-ключ не задан.
     """
+    # --- ВРЕМЕННОЕ ИЗМЕНЕНИЕ ДЛЯ ТЕСТИРОВАНИЯ ---
+    if not settings.GPT_API_KEY or settings.GPT_API_KEY == 'your-gpt-api-key-goes-here':
+        print("--- GPT Service: РАБОТА В MOCK-РЕЖИМЕ (КЛЮЧ НЕ НАЙДЕН) ---")
+        time.sleep(3) # Имитируем задержку ответа от API
+        return f"Это mock-ответ на ваш вопрос: '{prompt}'. Асинхронная задача работает!"
+    # ---------------------------------------------
+
     if not history:
         history = []
 
     try:
-        # Причина: Используем современный SDK OpenAI, который требует
-        # инстанцирования клиента. API-ключ безопасно берется из настроек Django.
         client = openai.OpenAI(api_key=settings.GPT_API_KEY)
-
-        # Причина: Добавляем системное сообщение, чтобы задать модель
-        # поведения для ИИ. Это улучшает качество и релевантность ответов.
         system_message = {
             "role": "system",
             "content": (
@@ -35,11 +32,9 @@ def get_gpt_response(prompt: str, history: list[dict] = None) -> str:
                 "Твои ответы должны быть короткими и поддерживающими."
             ),
         }
-
         messages = [system_message] + history + [{"role": "user", "content": prompt}]
-
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # Или другая подходящая модель
+            model="gpt-3.5-turbo",
             messages=messages,
             temperature=0.7,
             max_tokens=250,
@@ -47,10 +42,8 @@ def get_gpt_response(prompt: str, history: list[dict] = None) -> str:
         return response.choices[0].message.content.strip()
 
     except openai.APIError as e:
-        # Обработка ошибок, связанных с API OpenAI (например, перегрузка сервера)
         print(f"Ошибка API OpenAI: {e}")
         return "К сожалению, сервис временно недоступен. Попробуйте позже."
     except Exception as e:
-        # Обработка других непредвиденных ошибок
         print(f"Непредвиденная ошибка в gpt_service: {e}")
         return "Произошла внутренняя ошибка. Мы уже работаем над ее устранением."

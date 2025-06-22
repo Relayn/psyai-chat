@@ -3,12 +3,8 @@ services:
   app:
     build: .
     container_name: psyai_app
-    # Команда для запуска dev-сервера Django.
-    # Мы еще не создали проект, но скоро создадим.
     command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
     volumes:
-      # Синхронизируем текущую папку с папкой /app в контейнере
-      # Это позволяет видеть изменения в коде без пересборки образа
       - .:/app
     ports:
       - "9000:8000"
@@ -16,6 +12,7 @@ services:
       - .env
     depends_on:
       - db
+      - redis
     restart: unless-stopped
 
   # Сервис базы данных PostgreSQL
@@ -23,17 +20,53 @@ services:
     image: postgres:15
     container_name: psyai_db
     volumes:
-      # Сохраняем данные БД между перезапусками контейнера
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      # Эти переменные должны совпадать с теми, что в DATABASE_URL
       POSTGRES_USER: psyai_user
       POSTGRES_PASSWORD: psyai_password
       POSTGRES_DB: psyai_db
     ports:
-      # Открываем порт 5432 для возможного подключения к БД с хост-машины
       - "5432:5432"
     restart: unless-stopped
+
+  # Сервис брокера сообщений Redis
+  redis:
+    image: redis:7-alpine
+    container_name: psyai_redis
+    restart: unless-stopped
+
+  # Сервис для фоновых задач Celery
+  worker:
+    build: .
+    container_name: psyai_worker
+    command: celery -A config worker -l info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    # ИСПРАВЛЕНИЕ: Запускаем воркер от имени нашего пользователя
+    user: appuser
+
+  # Мониторинг Celery через Flower
+  flower:
+    build: .
+    container_name: psyai_flower
+    command: celery -A config flower
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+    restart: unless-stopped
+    # ИСПРАВЛЕНИЕ: Запускаем flower от имени нашего пользователя
+    user: appuser
 
 volumes:
   postgres_data:

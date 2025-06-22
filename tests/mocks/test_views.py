@@ -1,34 +1,28 @@
 import base64
 import os
+import tempfile
 
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.urls import reverse
 
 User = get_user_model()
 
 
+# ИСПРАВЛЕНИЕ: Используем override_settings для изоляции теста
+@override_settings(MEDIA_ROOT=tempfile.gettempdir())
 @pytest.mark.django_db
 def test_upload_image_view(client):
     """
-    Тестирует полный цикл загрузки изображения:
-    1. Создает и логинит пользователя.
-    2. Имитирует POST-запрос с валидным файлом-изображением.
-    3. Проверяет, что форма валидна и ответ сервера корректен.
-    4. Проверяет, что в контексте шаблона есть URL файла и результат анализа.
-    5. Проверяет, что в HTML-ответе отображаются результаты.
-    6. Проверяет, что файл физически сохранен в папке media.
-    7. Удаляет созданный файл после теста.
+    Тестирует полный цикл загрузки изображения.
     """
     # 1. Подготовка (Arrange)
     user = User.objects.create_user(username="testuser", password="password")
     client.login(username="testuser", password="password")
 
-    # --- ИСПРАВЛЕНО: Используем контент реального 1x1 GIF-изображения ---
-    # Причина: forms.ImageField проверяет, что файл является валидным изображением.
-    # Мы создаем минимально возможное изображение, чтобы пройти эту проверку.
     gif_content = base64.b64decode(
         b"R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
     )
@@ -51,14 +45,12 @@ def test_upload_image_view(client):
 
     response_text = response.content.decode("utf-8")
     assert "<h3>Результаты анализа:</h3>" in response_text
+    # Примечание: Мы больше не проверяем путь к файлу так строго,
+    # так как он теперь во временной директории.
     assert 'src="/media/test_pixel' in response_text
 
     # Проверяем, что файл действительно был сохранен
-    media_dir = settings.MEDIA_ROOT
+    # (хотя в данном случае это менее критично, так как ОС сама управляет /tmp)
+    media_dir = tempfile.gettempdir()
     saved_files = [f for f in os.listdir(media_dir) if f.startswith("test_pixel")]
-    assert len(saved_files) > 0, "Файл должен быть сохранен на диске"
-    saved_file_path = os.path.join(media_dir, saved_files[0])
-
-    # 4. Очистка (Cleanup)
-    if os.path.exists(saved_file_path):
-        os.remove(saved_file_path)
+    assert len(saved_files) > 0, "Файл должен быть сохранен во временной директории"

@@ -31,13 +31,32 @@
         align-self: flex-start;
         text-align: left;
     }
-    /* --- НОВОЕ: Стили для системных сообщений --- */
     .system-message {
-        color: #dc3545; /* Красный цвет для предупреждений */
+        color: #dc3545;
         font-style: italic;
         text-align: center;
         align-self: center;
         width: 100%;
+    }
+    /* --- Стили для индикатора печати --- */
+    .typing-indicator {
+        display: none; /* Скрыт по умолчанию */
+        align-self: flex-start;
+        padding: 0.5rem 1rem;
+    }
+    .typing-indicator span {
+        height: 8px;
+        width: 8px;
+        background-color: #888;
+        border-radius: 50%;
+        display: inline-block;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .typing-indicator span:nth-of-type(2) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-of-type(3) { animation-delay: -0.16s; }
+    @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1.0); }
     }
     #chat-form {
         display: flex;
@@ -50,7 +69,10 @@
 
 <h2>Чат с ИИ-психологом</h2>
 <div id="chat-log">
-    <!-- Сообщения будут добавляться сюда через JS -->
+    <!-- Элемент для индикатора печати -->
+    <div class="typing-indicator" id="ai-typing-indicator">
+        <span></span><span></span><span></span>
+    </div>
 </div>
 <form id="chat-form">
     <input id="chat-message-input" type="text" autocomplete="off" placeholder="Введите ваше сообщение...">
@@ -62,16 +84,18 @@
     const messageInput = document.querySelector('#chat-message-input');
     const messageSubmit = document.querySelector('#chat-message-submit');
     const chatForm = document.querySelector('#chat-form');
+    const typingIndicator = document.querySelector('#ai-typing-indicator'); // НОВОЕ
 
-    // --- 1. Установка WebSocket соединения ---
     const chatSocket = new WebSocket(
         'ws://' + window.location.host + '/ws/chat/'
     );
 
-    // --- 2. Обработка входящих сообщений ---
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         const messageType = data.type;
+
+        // Скрываем индикатор печати при получении финального сообщения
+        typingIndicator.style.display = 'none';
 
         if (messageType === 'chat.message') {
             const sender = data.payload.sender;
@@ -86,63 +110,52 @@
             } else {
                 messageElement.classList.add('ai-message');
             }
+            // Вставляем сообщение ПЕРЕД индикатором печати
+            chatLog.insertBefore(messageElement, typingIndicator);
 
-            chatLog.appendChild(messageElement);
-
-        // --- НОВОЕ: Обработка сообщения о достижении лимита ---
         } else if (messageType === 'limit.reached') {
             const limitText = data.payload.message;
-
             const systemMessageElement = document.createElement('div');
             systemMessageElement.classList.add('system-message');
             systemMessageElement.textContent = limitText;
-            chatLog.appendChild(systemMessageElement);
-
-            // Блокируем форму отправки
+            chatLog.insertBefore(systemMessageElement, typingIndicator);
             messageInput.disabled = true;
             messageInput.placeholder = "Сессия завершена. Обновите страницу, чтобы начать новую.";
             messageSubmit.disabled = true;
+
+        // --- Обработка статуса "ИИ печатает..." ---
+        } else if (messageType === 'ai.typing') {
+            typingIndicator.style.display = 'block';
         }
 
-        // Прокручиваем вниз при любом новом сообщении
         chatLog.scrollTop = chatLog.scrollHeight;
     };
 
-    // --- 3. Обработка закрытия соединения ---
     chatSocket.onclose = function(e) {
         console.error('Chat socket closed.', e);
-
-        // --- НОВОЕ: Улучшенное сообщение о закрытии ---
-        // Если форма еще не заблокирована, значит, это неожиданное закрытие.
+        typingIndicator.style.display = 'none'; // Скрываем при закрытии
         if (!messageInput.disabled) {
             const errorElement = document.createElement('div');
             errorElement.classList.add('system-message');
             errorElement.textContent = 'Соединение с сервером потеряно. Пожалуйста, обновите страницу.';
-            chatLog.appendChild(errorElement);
-
-            // Блокируем форму
+            chatLog.insertBefore(errorElement, typingIndicator);
             messageInput.disabled = true;
             messageSubmit.disabled = true;
         }
     };
 
-    // --- 4. Отправка сообщения ---
     chatForm.onsubmit = function(e) {
         e.preventDefault();
-
         const message = messageInput.value;
-        if (message.trim() === '') {
-            return;
-        }
+        if (message.trim() === '') return;
 
-        chatSocket.send(JSON.stringify({
-            'message': message
-        }));
+        chatSocket.send(JSON.stringify({ 'message': message }));
 
+        // Отображаем сообщение пользователя локально
         const userMessageElement = document.createElement('div');
         userMessageElement.classList.add('message', 'user-message');
         userMessageElement.textContent = message;
-        chatLog.appendChild(userMessageElement);
+        chatLog.insertBefore(userMessageElement, typingIndicator);
         chatLog.scrollTop = chatLog.scrollHeight;
 
         messageInput.value = '';

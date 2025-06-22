@@ -5,31 +5,43 @@ FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Устанавливаем рабочую директорию внутри контейнера
+# Создаем непривилегированного пользователя
+RUN addgroup --system appuser && adduser --system --ingroup appuser appuser
+
+# Устанавливаем рабочую директорию
 WORKDIR /app
 
 # Устанавливаем системные зависимости
-# build-essential и libpq-dev нужны для сборки psycopg2
 RUN apt-get update && apt-get install -y build-essential libpq-dev
 
 # Устанавливаем Poetry
 RUN pip install poetry
 
 # Копируем файлы с зависимостями
-# Мы копируем их отдельно, чтобы Docker мог кэшировать этот слой
 COPY poetry.lock pyproject.toml /app/
 
-# Устанавливаем зависимости проекта, не устанавливая сам проект
-# и не создавая виртуальное окружение внутри Docker
+# Устанавливаем зависимости проекта
 RUN poetry config virtualenvs.create false && \
     poetry install --no-root --no-interaction --no-ansi
 
 # Копируем весь остальной код проекта в контейнер
 COPY . /app/
 
+# --- ИСПРАВЛЕНИЕ: Создаем папку для медиафайлов ---
+# Причина: Создаем папку media и staticsfiles до смены пользователя,
+# чтобы затем корректно назначить на них права.
+RUN mkdir -p /app/media /app/staticfiles
+
+# --- ИСПРАВЛЕНИЕ: Меняем владельца всех файлов, включая media ---
+# Причина: Делаем нашего пользователя владельцем всех файлов в /app,
+# включая только что созданную папку /media, чтобы он мог в нее писать.
+RUN chown -R appuser:appuser /app
+
+# Переключаемся на непривилегированного пользователя
+USER appuser
+
 # Открываем порт, который будет использовать Django
 EXPOSE 8000
 
-# Команда для запуска приложения (пока что просто для примера)
-# Мы будем переопределять ее в docker-compose.yml
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Команда для запуска приложения
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]
