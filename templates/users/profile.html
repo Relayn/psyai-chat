@@ -1,3 +1,4 @@
+<!-- Файл: templates/users/profile.html -->
 {% extends "base.html" %}
 
 {% block title %}Личный кабинет{% endblock %}
@@ -9,6 +10,7 @@
     <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
         <a href="{% url 'chat_room' %}"><button>Начать чат</button></a>
         <a href="{% url 'mocks:image_analysis' %}"><button style="background-color: #6c757d;">Анализ по фото (Mock)</button></a>
-        <a href="{% url 'mocks:mock_payment' %}"><button style="background-color: #c9ada7;">Оплатить доступ (Mock)</button></a>
+        <!-- ИЗМЕНЕНО: Ссылка ведет на создание реального платежа -->
+        <a href="{% url 'payments:create_payment' %}"><button style="background-color: #c9ada7;">Оплатить доступ</button></a>
     </div>
 {% endblock %}

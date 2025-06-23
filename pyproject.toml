@@ -20,6 +20,7 @@ pillow = "^11.2.1"
 whitenoise = "^6.9.0"
 celery = "^5.4.0"
 redis = "^5.0.7"
+yookassa = "^3.5.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "chat.apps.ChatConfig",
     "mocks.apps.MocksConfig",
+    "payments.apps.PaymentsConfig",
     "channels",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -144,6 +145,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.User"
 
 # --- 10. Настройки редиректов после входа/выхода ---
+LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "profile"  # Имя маршрута для перенаправления после входа
 LOGOUT_REDIRECT_URL = "home"  # Имя маршрута для перенаправления после выхода
 
@@ -163,3 +165,19 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+
+# --- 14. Настройки ЮKassa ---
+YOOKASSA_SHOP_ID = env("YOOKASSA_SHOP_ID", default=None)
+YOOKASSA_SECRET_KEY = env("YOOKASSA_SECRET_KEY", default=None)
+
+# --- 15. Настройки безопасности вебхуков ---
+YOOKASSA_WEBHOOK_IPS = [
+    "185.71.76.0/27",
+    "185.71.77.0/27",
+    "77.75.153.0/25",
+    "77.75.154.128/25",
+    "2a02:5180:0:1509::/64",
+    "2a02:5180:0:2655::/64",
+    "2a02:5180:0:1533::/64",
+    "2a02:5180:0:2669::/64",
+]
