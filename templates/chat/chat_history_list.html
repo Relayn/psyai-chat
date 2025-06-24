@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}История сессий{% endblock %}
+
+{% block content %}
+<style>
+    .session-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    .session-item {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+    }
+    .session-item a {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    .session-item:hover {
+        background-color: #e9ecef;
+    }
+    .session-meta {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+</style>
+
+<h2>История сессий</h2>
+
+<ul class="session-list">
+    {% for session in sessions %}
+        <li class="session-item">
+            <a href="{% url 'chat_history_detail' session.id %}">
+                <strong>Сессия от {{ session.start_time|date:"d.m.Y H:i" }}</strong>
+                <div class="session-meta">
+                    Сообщений: {{ session.message_count }}
+                </div>
+            </a>
+        </li>
+    {% empty %}
+        <p>У вас пока нет сохраненных сессий. Начните <a href="{% url 'chat_room' %}">новый диалог</a>!</p>
+    {% endfor %}
+</ul>
+{% endblock %}

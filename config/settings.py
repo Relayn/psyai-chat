@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "mocks.apps.MocksConfig",
     "payments.apps.PaymentsConfig",
     "channels",
+    "anymail",  # Добавлено для отправки email
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -181,3 +182,20 @@ YOOKASSA_WEBHOOK_IPS = [
     "2a02:5180:0:1533::/64",
     "2a02:5180:0:2669::/64",
 ]
+
+# --- 16. Настройки Email ---
+# Если в режиме DEBUG, выводим письма в консоль вместо реальной отправки.
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
+
+# Настройки для anymail (используются, когда DEBUG=False)
+ANYMAIL = {
+    "SENDGRID_API_KEY": env("SENDGRID_API_KEY", default=None),
+}
+
+# Email, который будет использоваться в поле "From" по умолчанию.
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
+# Email, на который будут приходить системные уведомления об ошибках.
+SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)

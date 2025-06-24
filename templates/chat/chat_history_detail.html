@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Просмотр сессии{% endblock %}
+
+{% block content %}
+<style>
+    #chat-log {
+        height: 500px;
+        border: 1px solid #ccc;
+        padding: 1rem;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        background-color: #fff;
+    }
+    .message {
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        max-width: 70%;
+        word-wrap: break-word;
+    }
+    .user-message {
+        background-color: #c3dafe;
+        align-self: flex-end;
+        text-align: right;
+    }
+    .ai-message {
+        background-color: #e9ecef;
+        align-self: flex-start;
+        text-align: left;
+    }
+    .message-timestamp {
+        font-size: 0.75em;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+</style>
+
+<h2>Просмотр сессии от {{ session.start_time|date:"d.m.Y H:i" }}</h2>
+<div id="chat-log">
+    {% for message in session.messages.all %}
+        <div class="message {% if message.sender_type == 'USER' %}user-message{% else %}ai-message{% endif %}">
+            {{ message.text|linebreaksbr }}
+            <div class="message-timestamp">
+                {{ message.timestamp|date:"H:i" }}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+<a href="{% url 'chat_history_list' %}"><button>Назад к истории</button></a>
+{% endblock %}
