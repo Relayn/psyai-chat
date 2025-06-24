@@ -6,9 +6,6 @@ import pytest
 from chat.services.gpt_service import get_gpt_response
 
 
-# Причина: Декоратор @patch "перехватывает" обращение к openai.OpenAI
-# внутри нашего сервиса и заменяет его на мок-объект (mock_openai_class).
-# Это позволяет нам полностью контролировать его поведение.
 @patch("chat.services.gpt_service.openai.OpenAI")
 def test_get_gpt_response_success(mock_openai_class, settings):
     """
@@ -16,8 +13,7 @@ def test_get_gpt_response_success(mock_openai_class, settings):
     Проверяет, что функция правильно вызывает API и возвращает текст ответа.
     """
     # 1. Настройка (Arrange)
-    # Причина: django-pytest требует, чтобы все настройки были доступны.
-    # Мы предоставляем фиктивный ключ, чтобы тест не падал из-за его отсутствия.
+    # Предоставляем фиктивный ключ, чтобы тест не падал из-за его отсутствия.
     settings.GPT_API_KEY = "dummy_test_key"
 
     # Создаем мок-объект, имитирующий ответ от API OpenAI

@@ -47,7 +47,6 @@ def yookassa_webhook_view(request):
 
     try:
         event_json = json.loads(request.body)
-        # ИЗМЕНЕНО: Используем импортированный класс WebhookNotification
         notification = WebhookNotification(event_json)
     except (json.JSONDecodeError, ValueError):
         return HttpResponseBadRequest("Invalid JSON or event format")

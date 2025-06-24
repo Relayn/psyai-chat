@@ -26,15 +26,11 @@ class ChatMessageAdmin(admin.ModelAdmin):
     search_fields = ("text", "session__user__username")
     ordering = ("-timestamp",)
 
-    # Причина: Стандартное поле __str__ может быть слишком длинным.
-    # Этот метод создает короткую версию текста для отображения в списке.
     @admin.display(description="Текст (начало)")
     def text_preview(self, obj):
         """Возвращает первые 50 символов сообщения."""
         return obj.text[:50] + "..." if len(obj.text) > 50 else obj.text
 
-    # Причина: Добавляем кастомные поля, которые ссылаются на связанные модели,
-    # для более информативного отображения.
     @admin.display(description="ID Сессии", ordering="session__id")
     def session_id(self, obj):
         return obj.session.id

@@ -35,8 +35,6 @@ def yookassa_ip_check(view_func):
                 break
 
         if not is_allowed:
-            # Причина: В реальном проекте здесь стоит добавить логирование
-            # для отслеживания попыток несанкционированного доступа.
             print(f"WARNING: Forbidden webhook access attempt from IP: {client_ip}")
             return HttpResponseForbidden("Forbidden: IP address not allowed.")
 

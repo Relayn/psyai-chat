@@ -8,6 +8,4 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = User
-        # Правильный способ: берем поля из родительской формы
-        # и добавляем к ним наши собственные.
         fields = UserCreationForm.Meta.fields + ("email",)

@@ -23,6 +23,7 @@ redis = "^5.0.7"
 yookassa = "^3.5.0"
 django-anymail = "^13.0"
 sendgrid = "^6.12.4"
+boto3 = "^1.38.42"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
@@ -45,11 +46,9 @@ line-length = 88
 target-version = ['py311']
 
 [tool.ruff]
-# Эта секция остается для ruff-format
 line-length = 88
 
 [tool.ruff.lint]
-# Новая, правильная секция для линтера
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings

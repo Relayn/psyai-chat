@@ -29,9 +29,6 @@ def chat_history_detail(request, session_id: int):
     """
     Отображает детальную историю сообщений для одной конкретной сессии.
     """
-    # Причина: get_object_or_404 с фильтром по request.user — это стандартная
-    # и надежная практика для проверки прав доступа. Она гарантирует, что
-    # пользователь не сможет просмотреть чужие диалоги.
     session = get_object_or_404(ChatSession, id=session_id, user=request.user)
     return render(
         request, "chat/chat_history_detail.html", {"session": session}

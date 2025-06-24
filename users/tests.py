@@ -42,7 +42,6 @@ def test_login_and_profile_access(client):
     3. Проверяет доступ к странице профиля после входа.
     """
     user_password = "testpassword123"
-    # ИСПРАВЛЕНО: Заменяем 'user' на '_', так как переменная не используется
     _ = User.objects.create_user(username="loginuser", password=user_password)
 
     profile_url = reverse("profile")

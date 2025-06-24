@@ -39,7 +39,6 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DJANGO_DEBUG")
 
 # Список хостов, которые могут обслуживать этот сайт.
-# В режиме DEBUG можно оставить пустым, но для Docker лучше указать.
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 RENDER_HOSTNAME = env("RENDER_EXTERNAL_HOSTNAME", default=None)
 if RENDER_HOSTNAME:
@@ -52,8 +51,9 @@ INSTALLED_APPS = [
     "chat.apps.ChatConfig",
     "mocks.apps.MocksConfig",
     "payments.apps.PaymentsConfig",
+    "analysis.apps.AnalysisConfig",
     "channels",
-    "anymail",  # Добавлено для отправки email
+    "anymail",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -79,7 +79,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # Указываем общую папку для шаблонов
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -199,3 +199,8 @@ ANYMAIL = {
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
 # Email, на который будут приходить системные уведомления об ошибках.
 SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+
+# --- 17. Настройки AWS ---
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", default=None)
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", default=None)
+AWS_REGION = env("AWS_REGION", default=None)

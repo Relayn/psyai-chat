@@ -10,10 +10,10 @@ class CustomUserAdmin(UserAdmin):
     Кастомизированное отображение для модели User в админ-панели.
     """
 
-    # Причина: Добавляем важные поля в список для быстрого просмотра.
+    # важные поля в список для быстрого просмотра.
     list_display = ("username", "email", "first_name", "last_name", "is_staff", "date_joined")
-    # Причина: Добавляем фильтры для удобной сегментации пользователей.
+    # фильтры для удобной сегментации пользователей.
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")
-    # Причина: Добавляем поиск по ключевым полям.
+    # поиск по ключевым полям.
     search_fields = ("username", "first_name", "last_name", "email")
 # Register your models here.

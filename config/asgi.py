@@ -18,7 +18,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django_asgi_app = get_asgi_application()
 
 # --- 2. И только ПОСЛЕ этого импортируем код наших приложений ---
-# Теперь, когда Django настроен, эти импорты будут работать безопасно.
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 import chat.routing

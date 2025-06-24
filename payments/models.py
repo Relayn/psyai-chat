@@ -23,7 +23,7 @@ class Payment(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,  # Причина: Сохраняем историю платежей, даже если пользователь удален
+        on_delete=models.SET_NULL,
         null=True,
         related_name="payments",
         verbose_name="Пользователь",

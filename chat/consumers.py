@@ -51,7 +51,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "payload": {"is_typing": True}
             }))
 
-            # ИСПРАВЛЕНИЕ: Используем self.scope['channel_name'] - самый надежный способ.
             process_gpt_request.delay(
                 session_id=self.chat_session.id,
                 user_prompt=user_message_text,
@@ -65,7 +64,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "payload": {"text": "На сервере произошла ошибка.", "sender": "System"}
             }))
 
-    # ... (остальные методы без изменений) ...
     async def _check_session_limits(self) -> str | None:
         await sync_to_async(self.chat_session.refresh_from_db)()
         if self.chat_session.message_count >= self.SESSION_MESSAGE_LIMIT:

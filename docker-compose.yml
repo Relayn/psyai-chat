@@ -48,7 +48,7 @@ services:
       - db
       - redis
     restart: unless-stopped
-    # ИСПРАВЛЕНИЕ: Запускаем воркер от имени нашего пользователя
+    # Запускаем воркер от имени нашего пользователя
     user: appuser
 
   # Мониторинг Celery через Flower
@@ -65,7 +65,7 @@ services:
     depends_on:
       - redis
     restart: unless-stopped
-    # ИСПРАВЛЕНИЕ: Запускаем flower от имени нашего пользователя
+    # Запускаем flower от имени нашего пользователя
     user: appuser
 
 volumes:

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Анализ изображения{% endblock %}
+
+{% block content %}
+    <h2>Анализ изображения</h2>
+    <p>Загрузите изображение, чтобы получить психологический анализ по нему. Обработка может занять некоторое время.</p>
+
+    <!-- Важно: enctype="multipart/form-data" необходим для загрузки файлов -->
+    <form method="post" enctype="multipart/form-data" action="{% url 'analysis:upload_image' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Анализировать</button>
+    </form>
+{% endblock %}

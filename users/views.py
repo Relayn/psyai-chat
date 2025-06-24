@@ -21,13 +21,7 @@ class SignUpView(CreateView):
     template_name = "users/signup.html"
 
     def form_valid(self, form):
-        # Примечание: Стандартный CreateView сам сохраняет пользователя.
-        # Этот метод можно было бы и не переопределять, но для ясности
-        # можно оставить, чтобы видеть, что происходит.
         response = super().form_valid(form)
-        # Можно автоматически залогинить пользователя после регистрации,
-        # но для MVP лучше явный шаг входа.
-        # login(self.request, self.object)
         return response
 
 

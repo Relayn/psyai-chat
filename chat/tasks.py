@@ -51,5 +51,3 @@ def process_gpt_request(session_id: int, user_prompt: str, channel_name: str):
         print(f"Ошибка в задаче Celery: Сессия чата с ID {session_id} не найдена.")
     except Exception as e:
         print(f"Ошибка в задаче Celery process_gpt_request: {e}")
-        # В реальном проекте здесь можно добавить логику для отправки
-        # сообщения об ошибке пользователю.

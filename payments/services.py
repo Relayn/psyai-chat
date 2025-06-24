@@ -43,7 +43,6 @@ def create_yookassa_payment(amount: Decimal, description: str, return_url: str) 
         "capture": True,
         "description": description,
         "metadata": {
-            # Здесь можно хранить доп. информацию, например, ID пользователя
         }
     }, idempotence_key)
 

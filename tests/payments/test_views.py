@@ -132,8 +132,6 @@ def test_webhook_idempotency(client, payment, settings):
         REMOTE_ADDR=allowed_ip,
     )
 
-    # Главное - что сервер вернул 200 и не упал с ошибкой
     assert response.status_code == 200
-    # Убедимся, что статус не изменился (хотя он и так был SUCCEEDED)
     payment.refresh_from_db()
     assert payment.status == Payment.Status.SUCCEEDED

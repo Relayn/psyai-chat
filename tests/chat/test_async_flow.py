@@ -23,10 +23,6 @@ async def test_receive_triggers_celery_task(mock_process_gpt_request_delay):
     """
     # 1. Настройка (Arrange)
     user = await User.objects.acreate_user(username="async_user", password="password")
-
-    # ИСПРАВЛЕНИЕ: Явно добавляем 'channel_name' в scope.
-    # Причина: Это гарантирует, что self.scope['channel_name'] будет доступен
-    # в consumer'е во время выполнения этого теста.
     test_channel_name = "test_specific_channel_name_for_this_test"
     communicator = WebsocketCommunicator(ChatConsumer.as_asgi(), "/ws/chat/")
     communicator.scope["channel_name"] = test_channel_name

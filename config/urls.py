@@ -12,6 +12,7 @@ urlpatterns = [
     # Подключаем все маршруты из нашего приложения mocks
     path("mocks/", include("mocks.urls")),
     path("payments/", include("payments.urls")),
+    path("analysis/", include("analysis.urls")),
 ]
 
 # --- Маршрутизация для медиафайлов в режиме разработки ---

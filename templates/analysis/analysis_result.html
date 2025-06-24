@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Результат анализа{% endblock %}
+
+{% block content %}
+<style>
+    .loader {
+        border: 4px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 4px solid #3498db;
+        width: 40px;
+        height: 40px;
+        animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .status-pending { color: #6c757d; }
+    .status-completed { color: #28a745; }
+    .status-failed { color: #dc3545; }
+    #result-container, #error-container { display: none; }
+</style>
+
+<h2>Результат анализа</h2>
+
+<div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start;">
+    <div style="flex: 1; min-width: 250px;">
+        <h4>Ваше изображение:</h4>
+        <img src="{{ result.source_image.url }}" alt="Загруженное изображение" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    </div>
+    <div style="flex: 2; min-width: 300px;">
+        <h4>Статус:</h4>
+        <div id="status-indicator">
+            <div class="loader"></div>
+            <p id="status-text" class="status-pending">В обработке...</p>
+        </div>
+
+        <div id="result-container">
+            <h4>Заключение PsyAI:</h4>
+            <ul id="emotion-list"></ul>
+        </div>
+
+        <div id="error-container">
+            <h4>Произошла ошибка:</h4>
+            <p id="error-message"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const resultId = {{ result.id }};
+    const statusApiUrl = `{% url 'analysis:get_analysis_status' 0 %}`.replace('0', resultId);
+
+    const statusIndicator = document.getElementById('status-indicator');
+    const statusText = document.getElementById('status-text');
+    const loader = document.querySelector('.loader');
+
+    const resultContainer = document.getElementById('result-container');
+    const emotionList = document.getElementById('emotion-list');
+    
+    const errorContainer = document.getElementById('error-container');
+    const errorMessage = document.getElementById('error-message');
+
+    const pollInterval = setInterval(pollStatus, 3000); // Опрашиваем каждые 3 секунды
+
+    function pollStatus() {
+        fetch(statusApiUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'COMPLETED') {
+                    clearInterval(pollInterval);
+                    statusIndicator.style.display = 'none';
+                    displayResults(data.result_payload);
+                } else if (data.status === 'FAILED') {
+                    clearInterval(pollInterval);
+                    statusIndicator.style.display = 'none';
+                    displayError(data.error_message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при опросе статуса:', error);
+                clearInterval(pollInterval);
+                displayError('Не удалось получить статус анализа. Пожалуйста, обновите страницу.');
+            });
+    }
+
+    function displayResults(payload) {
+        resultContainer.style.display = 'block';
+        
+        if (payload.FaceDetails && payload.FaceDetails.length > 0) {
+            const emotions = payload.FaceDetails[0].Emotions;
+            emotions.sort((a, b) => b.Confidence - a.Confidence); // Сортируем по уверенности
+            
+            emotions.forEach(emotion => {
+                const li = document.createElement('li');
+                li.textContent = `${emotion.Type}: ${emotion.Confidence.toFixed(2)}%`;
+                emotionList.appendChild(li);
+            });
+        } else {
+            const li = document.createElement('li');
+            li.textContent = 'На изображении не найдено лиц для анализа.';
+            emotionList.appendChild(li);
+        }
+    }
+
+    function displayError(message) {
+        errorContainer.style.display = 'block';
+        errorMessage.textContent = message || 'Произошла неизвестная ошибка.';
+    }
+
+    // Запускаем первый опрос сразу, не дожидаясь интервала
+    pollStatus();
+</script>
+{% endblock %}
