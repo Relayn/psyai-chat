@@ -76,7 +76,7 @@ async def test_anonymous_user_rejected():
     communicator.scope["user"] = AnonymousUser()
 
     # Пытаемся подключиться
-    connected, close_code = await communicator.connect()
+    connected, _ = await communicator.connect()
 
     # Проверяем, что соединение НЕ установлено
     assert not connected

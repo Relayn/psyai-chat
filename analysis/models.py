@@ -46,7 +46,7 @@ class ImageAnalysisResult(models.Model):
         null=True, blank=True, verbose_name="Результат от API"
     )
     error_message = models.TextField(
-        null=True, blank=True, verbose_name="Сообщение об ошибке"
+        blank=True, verbose_name="Сообщение об ошибке", default=""
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Время обновления")

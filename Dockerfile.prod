@@ -2,7 +2,7 @@
 
 # --- СТАДИЯ 1: Сборка зависимостей ---
 # Используем образ с Poetry для установки зависимостей
-FROM python:3.13-slim as builder
+FROM python:3.13-slim AS builder
 
 # Устанавливаем переменные окружения
 ENV PYTHONDONTWRITEBYTECODE 1

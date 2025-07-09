@@ -46,7 +46,7 @@ def yookassa_webhook_view(request):
     try:
         event_json = json.loads(request.body)
         notification = WebhookNotification(event_json)
-    except (json.JSONDecodeError, ValueError):
+    except ValueError:
         return HttpResponseBadRequest("Invalid JSON or event format.")
 
     payment_id = notification.object.id

@@ -6,7 +6,6 @@
     <h2>Анализ изображения (Mock)</h2>
     <p>Загрузите изображение, чтобы получить имитацию психологического анализа по нему. Это демонстрационная функция.</p>
 
-    <!-- Важно: enctype="multipart/form-data" необходим для загрузки файлов -->
     <form method="post" enctype="multipart/form-data" style="margin-bottom: 2rem;">
         {% csrf_token %}
         {{ form.as_p }}

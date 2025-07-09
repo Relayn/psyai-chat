@@ -9,8 +9,6 @@ urlpatterns = [
     path("", include("users.urls")),
     # Подключаем все маршруты из нашего приложения chat
     path("", include("chat.urls")),
-    # Подключаем все маршруты из нашего приложения mocks
-    path("mocks/", include("mocks.urls")),
     path("payments/", include("payments.urls")),
     path("analysis/", include("analysis.urls")),
 ]

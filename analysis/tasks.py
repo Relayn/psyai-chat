@@ -1,4 +1,3 @@
-from botocore.exceptions import ClientError
 from celery import shared_task
 
 from .models import ImageAnalysisResult
@@ -31,7 +30,7 @@ def analyze_image_task(result_id: int):
         print(f"Ошибка в задаче: ImageAnalysisResult с ID {result_id} не найден.")
         # Здесь задача просто завершается, так как исправлять нечего.
 
-    except (ClientError, ValueError, Exception) as e:
+    except Exception as e:
         # Ловим специфичные ошибки от boto3 и общие исключения
         print(f"Ошибка при анализе изображения (ID: {result_id}): {e}")
         if "result" in locals():

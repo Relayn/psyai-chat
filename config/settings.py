@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     "core.apps.CoreConfig",
     "users.apps.UsersConfig",
     "chat.apps.ChatConfig",
-    "mocks.apps.MocksConfig",
     "payments.apps.PaymentsConfig",
     "analysis.apps.AnalysisConfig",
     "channels",
