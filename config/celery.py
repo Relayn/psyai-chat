@@ -1,7 +1,6 @@
 import os
 
 from celery import Celery
-from django.conf import settings
 
 # Устанавливаем переменную окружения, чтобы Celery знал,
 # где найти настройки нашего Django-проекта.

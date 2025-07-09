@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock, patch
 
 import openai
-import pytest
 
 from chat.services.gpt_service import get_gpt_response
 
@@ -49,8 +48,8 @@ def test_get_gpt_response_api_error(mock_openai_class, settings):
 
     # Настраиваем мок так, чтобы он "выбрасывал" ошибку APIError при вызове
     error_message = "The server is overloaded or not ready yet."
-    mock_openai_class.return_value.chat.completions.create.side_effect = openai.APIError(
-        message=error_message, request=None, body=None
+    mock_openai_class.return_value.chat.completions.create.side_effect = (
+        openai.APIError(message=error_message, request=None, body=None)
     )
 
     # 2. Действие
@@ -79,4 +78,7 @@ def test_get_gpt_response_generic_error(mock_openai_class, settings):
     response_text = get_gpt_response("Любой промпт")
 
     # 3. Проверка
-    assert response_text == "Произошла внутренняя ошибка. Мы уже работаем над ее устранением."
+    assert (
+        response_text
+        == "Произошла внутренняя ошибка. Мы уже работаем над ее устранением."
+    )

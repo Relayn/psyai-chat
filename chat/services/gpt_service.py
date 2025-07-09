@@ -1,8 +1,7 @@
-import os
 import time
 
-from django.conf import settings
 import openai
+from django.conf import settings
 
 
 def get_gpt_response(prompt: str, history: list[dict] = None) -> str:
@@ -11,9 +10,9 @@ def get_gpt_response(prompt: str, history: list[dict] = None) -> str:
     Включает mock-режим, если API-ключ не задан.
     """
     # --- ВРЕМЕННОЕ ИЗМЕНЕНИЕ ДЛЯ ТЕСТИРОВАНИЯ ---
-    if not settings.GPT_API_KEY or settings.GPT_API_KEY == 'your-gpt-api-key-goes-here':
+    if not settings.GPT_API_KEY or settings.GPT_API_KEY == "your-gpt-api-key-goes-here":
         print("--- GPT Service: РАБОТА В MOCK-РЕЖИМЕ (КЛЮЧ НЕ НАЙДЕН) ---")
-        time.sleep(3) # Имитируем задержку ответа от API
+        time.sleep(3)  # Имитируем задержку ответа от API
         return f"Это mock-ответ на ваш вопрос: '{prompt}'. Асинхронная задача работает!"
     # ---------------------------------------------
 

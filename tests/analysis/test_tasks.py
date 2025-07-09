@@ -1,8 +1,9 @@
 from unittest.mock import patch
+
 import pytest
+from botocore.exceptions import ClientError
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from botocore.exceptions import ClientError
 
 from analysis.models import ImageAnalysisResult
 from analysis.tasks import analyze_image_task

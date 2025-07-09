@@ -46,9 +46,9 @@ def test_login_and_profile_access(client):
 
     profile_url = reverse("profile")
     response = client.get(profile_url)
-    assert (
-        response.status_code == 302
-    ), "Анонимный пользователь должен быть перенаправлен."
+    assert response.status_code == 302, (
+        "Анонимный пользователь должен быть перенаправлен."
+    )
     assert reverse("login") in response.url, "Редирект должен вести на страницу входа."
 
     login_url = reverse("login")

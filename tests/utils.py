@@ -1,6 +1,8 @@
+from io import BytesIO
+
 from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
-from io import BytesIO
+
 
 @deconstructible
 class InMemoryStorage(Storage):
@@ -8,6 +10,7 @@ class InMemoryStorage(Storage):
     Простое файловое хранилище, которое держит файлы в памяти.
     Идеально для тестов.
     """
+
     def __init__(self):
         self.files = {}
 
@@ -15,7 +18,7 @@ class InMemoryStorage(Storage):
         self.files[name] = BytesIO(content.read())
         return name
 
-    def _open(self, name, mode='rb'):
+    def _open(self, name, mode="rb"):
         return self.files[name]
 
     def exists(self, name):

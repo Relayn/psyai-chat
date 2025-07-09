@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
 from .models import ChatSession
 
@@ -19,9 +19,7 @@ def chat_history_list(request):
     Отображает список всех прошлых сессий чата для текущего пользователя.
     """
     sessions = ChatSession.objects.filter(user=request.user)
-    return render(
-        request, "chat/chat_history_list.html", {"sessions": sessions}
-    )
+    return render(request, "chat/chat_history_list.html", {"sessions": sessions})
 
 
 @login_required
@@ -30,6 +28,4 @@ def chat_history_detail(request, session_id: int):
     Отображает детальную историю сообщений для одной конкретной сессии.
     """
     session = get_object_or_404(ChatSession, id=session_id, user=request.user)
-    return render(
-        request, "chat/chat_history_detail.html", {"session": session}
-    )
+    return render(request, "chat/chat_history_detail.html", {"session": session})

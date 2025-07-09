@@ -11,9 +11,18 @@ class CustomUserAdmin(UserAdmin):
     """
 
     # важные поля в список для быстрого просмотра.
-    list_display = ("username", "email", "first_name", "last_name", "is_staff", "date_joined")
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "date_joined",
+    )
     # фильтры для удобной сегментации пользователей.
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")
     # поиск по ключевым полям.
     search_fields = ("username", "first_name", "last_name", "email")
+
+
 # Register your models here.

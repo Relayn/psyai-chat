@@ -18,10 +18,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django_asgi_app = get_asgi_application()
 
 # --- 2. И только ПОСЛЕ этого импортируем код наших приложений ---
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
-import chat.routing
+from channels.auth import AuthMiddlewareStack  # noqa: E402
+from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
 
+import chat.routing  # noqa: E402
 
 # --- 3. Собираем итоговое приложение ---
 # ProtocolTypeRouter будет проверять тип входящего соединения

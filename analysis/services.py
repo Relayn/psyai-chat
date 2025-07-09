@@ -1,5 +1,4 @@
 import boto3
-from botocore.exceptions import ClientError
 from django.conf import settings
 
 
@@ -20,9 +19,7 @@ def detect_emotions_from_image(image_bytes: bytes) -> dict:
     if not settings.AWS_REGION:
         raise ValueError("Необходимо указать регион AWS в настройках (AWS_REGION).")
 
-    rekognition_client = boto3.client(
-        "rekognition", region_name=settings.AWS_REGION
-    )
+    rekognition_client = boto3.client("rekognition", region_name=settings.AWS_REGION)
 
     # ClientError будет перехвачен в Celery-задаче
     response = rekognition_client.detect_faces(

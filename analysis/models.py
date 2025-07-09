@@ -21,6 +21,7 @@ class ImageAnalysisResult(models.Model):
 
     class Status(models.TextChoices):
         """Статусы выполнения задачи анализа."""
+
         PENDING = "PENDING", "В обработке"
         COMPLETED = "COMPLETED", "Завершено"
         FAILED = "FAILED", "Ошибка"
@@ -47,9 +48,7 @@ class ImageAnalysisResult(models.Model):
     error_message = models.TextField(
         null=True, blank=True, verbose_name="Сообщение об ошибке"
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Время создания"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Время обновления")
 
     class Meta:
@@ -58,4 +57,6 @@ class ImageAnalysisResult(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Анализ {self.id} для {self.user.username} ({self.get_status_display()})"
+        return (
+            f"Анализ {self.id} для {self.user.username} ({self.get_status_display()})"
+        )

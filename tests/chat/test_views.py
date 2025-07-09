@@ -61,7 +61,9 @@ def test_chat_history_list_shows_only_own_sessions(
     # Проверяем, что сессия user_two ОТСУТСТВУЕТ на странице
     assert session_for_user_two.id not in [s.id for s in response.context["sessions"]]
     # Проверяем, что в контенте есть упоминание количества сообщений нашей сессии
-    assert f"Сообщений: {session_for_user_one.message_count}" in response.content.decode()
+    assert (
+        f"Сообщений: {session_for_user_one.message_count}" in response.content.decode()
+    )
 
 
 # --- Тесты для детального просмотра истории ---

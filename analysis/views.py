@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from .forms import ImageUploadForm
@@ -54,10 +54,12 @@ def get_analysis_status_view(request, result_id: int):
     """
     result = get_object_or_404(ImageAnalysisResult, id=result_id, user=request.user)
 
-    return JsonResponse({
-        "id": result.id,
-        "status": result.status,
-        "status_display": result.get_status_display(),
-        "result_payload": result.result_payload,
-        "error_message": result.error_message,
-    })
+    return JsonResponse(
+        {
+            "id": result.id,
+            "status": result.status,
+            "status_display": result.get_status_display(),
+            "result_payload": result.result_payload,
+            "error_message": result.error_message,
+        }
+    )

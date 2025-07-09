@@ -1,0 +1,40 @@
+# Список репозиториев, из которых мы будем брать хуки
+repos:
+  # Стандартные хуки для поддержания чистоты файлов
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace # Удаляет лишние пробелы в конце строк
+      - id: end-of-file-fixer  # Гарантирует, что файл заканчивается одной пустой строкой
+      - id: check-yaml           # Проверяет синтаксис YAML файлов
+      - id: check-added-large-files # Предотвращает коммит больших файлов
+
+# Хук для форматирования кода с помощью Black.
+# ВРЕМЕННО ОТКЛЮЧЕН, так как ruff-format выполняет ту же функцию,
+# что позволяет избежать конфликта форматеров.
+#  - repo: https://github.com/psf/black
+#    rev: 25.1.0
+#    hooks:
+#      - id: black
+#        language_version: python3.13
+
+  # Хук для линтинга и форматирования с помощью Ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.2
+    hooks:
+      - id: ruff
+        args: [ --fix ] # Автоматически исправлять найденные проблемы
+      - id: ruff-format
+
+  # Наш локальный хук для проверки уязвимостей
+  - repo: local
+    hooks:
+      - id: pip-audit
+        name: pip-audit
+        # Этот хук состоит из двух шагов:
+        # 1. poetry run pip freeze...: Создает requirements.txt
+        # 2. poetry run pip-audit...: Запускает аудит по этому файлу
+        entry: poetry run pip freeze > requirements.txt && poetry run pip-audit -r requirements.txt
+        language: system
+        pass_filenames: false
+        always_run: true

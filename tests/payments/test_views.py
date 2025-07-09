@@ -70,6 +70,7 @@ def test_create_payment_success(mock_create_payment, client, user):
 
 # --- Тесты для вебхука ---
 
+
 def test_webhook_forbidden_for_invalid_ip(client, payment):
     """Тест: вебхук возвращает 403, если IP не из списка ЮKassa."""
     url = reverse("payments:yookassa_webhook")

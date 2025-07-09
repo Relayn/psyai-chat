@@ -1,9 +1,6 @@
 from django.contrib.auth.decorators import login_required
-from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
 
-from .forms import ImageUploadForm
-from .services import mock_image_analysis
 
 @login_required
 def mock_payment_view(request):

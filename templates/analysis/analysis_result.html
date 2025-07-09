@@ -58,7 +58,7 @@
 
     const resultContainer = document.getElementById('result-container');
     const emotionList = document.getElementById('emotion-list');
-    
+
     const errorContainer = document.getElementById('error-container');
     const errorMessage = document.getElementById('error-message');
 
@@ -87,11 +87,11 @@
 
     function displayResults(payload) {
         resultContainer.style.display = 'block';
-        
+
         if (payload.FaceDetails && payload.FaceDetails.length > 0) {
             const emotions = payload.FaceDetails[0].Emotions;
             emotions.sort((a, b) => b.Confidence - a.Confidence); // Сортируем по уверенности
-            
+
             emotions.forEach(emotion => {
                 const li = document.createElement('li');
                 li.textContent = `${emotion.Type}: ${emotion.Confidence.toFixed(2)}%`;

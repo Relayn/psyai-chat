@@ -72,7 +72,7 @@ def test_full_user_journey(client):
     response = client.get(chat_url)
 
     assert response.status_code == 200, "Страница чата должна быть доступна"
-    assert (
-        "Чат с ИИ-психологом" in response.content.decode("utf-8")
-    ), "На странице чата должен быть заголовок"
+    assert "Чат с ИИ-психологом" in response.content.decode("utf-8"), (
+        "На странице чата должен быть заголовок"
+    )
     print("✅ Этап перехода в чат пройден успешно. Интеграционный тест завершен!")

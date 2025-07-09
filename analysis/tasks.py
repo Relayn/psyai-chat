@@ -1,5 +1,5 @@
-from celery import shared_task
 from botocore.exceptions import ClientError
+from celery import shared_task
 
 from .models import ImageAnalysisResult
 from .services import detect_emotions_from_image

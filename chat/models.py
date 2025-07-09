@@ -21,9 +21,7 @@ class ChatSession(models.Model):
         related_name="chat_sessions",
         verbose_name="Пользователь",
     )
-    start_time = models.DateTimeField(
-        auto_now_add=True, verbose_name="Время начала"
-    )
+    start_time = models.DateTimeField(auto_now_add=True, verbose_name="Время начала")
     message_count = models.PositiveIntegerField(
         default=0, verbose_name="Количество сообщений"
     )
@@ -34,7 +32,8 @@ class ChatSession(models.Model):
         ordering = ["-start_time"]
 
     def __str__(self):
-        return f"Сессия {self.user.username} от {self.start_time.strftime('%Y-%m-%d %H:%M')}"
+        start_str = self.start_time.strftime("%Y-%m-%d %H:%M")
+        return f"Сессия {self.user.username} от {start_str}"
 
 
 class ChatMessage(models.Model):
@@ -63,9 +62,7 @@ class ChatMessage(models.Model):
         verbose_name="Сессия",
     )
     text = models.TextField(verbose_name="Текст сообщения")
-    timestamp = models.DateTimeField(
-        auto_now_add=True, verbose_name="Время отправки"
-    )
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Время отправки")
     sender_type = models.CharField(
         max_length=4,
         choices=SenderType.choices,
@@ -78,9 +75,6 @@ class ChatMessage(models.Model):
         ordering = ["timestamp"]
 
     def __str__(self):
-        return f"{self.get_sender_type_display()} в {self.timestamp.strftime('%H:%M:%S')}"
-
-
-from django.db import models
-
-# Create your models here.
+        return (
+            f"{self.get_sender_type_display()} в {self.timestamp.strftime('%H:%M:%S')}"
+        )

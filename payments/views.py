@@ -22,15 +22,13 @@ def create_payment_view(request):
     payment_description = "Доступ к расширенным функциям PsyAI"
     return_url = request.build_absolute_uri(reverse("profile"))
     yookassa_payment = create_yookassa_payment(
-        amount=payment_amount,
-        description=payment_description,
-        return_url=return_url
+        amount=payment_amount, description=payment_description, return_url=return_url
     )
     Payment.objects.create(
         user=request.user,
         yookassa_payment_id=yookassa_payment.id,
         amount=payment_amount,
-        status=yookassa_payment.status.upper()
+        status=yookassa_payment.status.upper(),
     )
     confirmation_url = yookassa_payment.confirmation.confirmation_url
     return redirect(confirmation_url)
@@ -49,7 +47,7 @@ def yookassa_webhook_view(request):
         event_json = json.loads(request.body)
         notification = WebhookNotification(event_json)
     except (json.JSONDecodeError, ValueError):
-        return HttpResponseBadRequest("Invalid JSON or event format")
+        return HttpResponseBadRequest("Invalid JSON or event format.")
 
     payment_id = notification.object.id
     try:
@@ -65,6 +63,9 @@ def yookassa_webhook_view(request):
     payment.save()
 
     if new_status == Payment.Status.SUCCEEDED:
-        print(f"✅ Успешный платеж! Пользователю {payment.user.username} предоставлен доступ.")
+        print(
+            f"✅ Успешный платеж! Пользователю {payment.user.username} "
+            f"предоставлен доступ."
+        )
 
     return HttpResponse(status=200)

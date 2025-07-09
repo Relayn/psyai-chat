@@ -1,10 +1,11 @@
+import io
 from unittest.mock import patch
+
 import pytest
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
 from PIL import Image
-import io
 
 from analysis.models import ImageAnalysisResult
 from tests.utils import InMemoryStorage
