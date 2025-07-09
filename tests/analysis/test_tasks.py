@@ -44,7 +44,7 @@ def test_analyze_image_task_success(mock_detect_emotions, image_analysis_result)
     mock_detect_emotions.assert_called_once()
     assert image_analysis_result.status == ImageAnalysisResult.Status.COMPLETED
     assert image_analysis_result.result_payload == MOCK_API_RESPONSE
-    assert image_analysis_result.error_message is None
+    assert image_analysis_result.error_message == ""
 
 
 @patch("django.core.files.storage.default_storage._wrapped", InMemoryStorage())
