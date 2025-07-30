@@ -155,6 +155,16 @@ LOGOUT_REDIRECT_URL = "home"  # Имя маршрута для перенапр�
 # Это необходимо для работы Django Channels.
 ASGI_APPLICATION = "config.asgi.application"
 
+# Настройки Channels для WebSocket
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [env("REDIS_URL", default="redis://redis:6379/0")],
+        },
+    },
+}
+
 # --- 12. Настройки внешних сервисов ---
 # Читаем API-ключ для GPT из .env файла.
 GPT_API_KEY = env("GPT_API_KEY")

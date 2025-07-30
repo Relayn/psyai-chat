@@ -24,6 +24,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
+        # Сохраняем имя канала для отправки сообщений
+        self.room_channel_name = self.channel_name
+
         await self.accept()
         self.chat_session = await ChatSession.objects.acreate(user=self.user)
         print(
@@ -62,7 +65,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             process_gpt_request.delay(
                 session_id=self.chat_session.id,
                 user_prompt=user_message_text,
-                channel_name=self.scope["channel_name"],
+                channel_name=self.room_channel_name,
             )
 
         except Exception as e:
