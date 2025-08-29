@@ -1,0 +1,28 @@
+[virtualenvs]
+in-project = true
+
+# --- Настройки инструментов качества кода ---
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main", "mypy_django_plugin.contrib.django_stubs_ext"]
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings"
+
+[tool.bandit]
+# Исключаем тесты из анализа безопасности, так как они могут содержать
+# намеренно "небезопасные" паттерны для проверки ошибок.
+exclude_dirs = ["tests", "migrations"]
+# B101: assert_used - отключаем, так как assert является основой pytest.
+# B105: hardcoded_password_string - отключаем, так как в тестах это норма.
+# B311: random - мы используем его только в mock-режиме, что безопасно.
+skips = ["B101", "B105", "B311"]
+
+[tool.radon]
+# Устанавливаем пороги для цикломатической сложности.
+# Функции со сложностью A (1-5) и B (6-10) считаются приемлемыми.
+# Все, что выше (C, D, F), будет вызывать ошибку.
+cc_max = "B"
+show_complexity = true

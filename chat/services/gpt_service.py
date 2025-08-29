@@ -1,8 +1,10 @@
+from typing import Optional
+
 import openai
 from django.conf import settings
 
 
-def get_gpt_response(prompt: str, history: list[dict] = None) -> str:
+def get_gpt_response(prompt: str, history: Optional[list[dict]] = None) -> str:
     """
     Отправляет запрос к API OpenAI и возвращает синхронный ответ.
 
@@ -48,7 +50,7 @@ def get_gpt_response(prompt: str, history: list[dict] = None) -> str:
         ]
         import random
 
-        return random.choice(responses)
+        return random.choice(responses)  # nosec B311
 
     try:
         # Примечание: Если settings.GPT_API_KEY не задан, конструктор OpenAI

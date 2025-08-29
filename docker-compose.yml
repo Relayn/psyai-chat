@@ -1,11 +1,16 @@
 services:
   # Сервис нашего Django-приложения
   app:
-    build: .
+    build:
+      context: .
+      target: app # Используем финальную стадию 'app'
     container_name: psyai_app
     command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
     volumes:
+      # Пробрасываем код для live-reloading
       - .:/app
+      # А для медиафайлов используем именованный том, который сохранит права
+      - media_volume:/app/media
     ports:
       - "9000:8000"
     env_file:
@@ -37,23 +42,29 @@ services:
 
   # Сервис для фоновых задач Celery
   worker:
-    build: .
+    build:
+      context: .
+      target: app # Используем ту же стадию, что и для 'app'
     container_name: psyai_worker
     command: celery -A config worker -l info
     volumes:
+      # Код нужен и воркеру
       - .:/app
+      # Медиафайлы могут понадобиться и воркеру (например, для обработки)
+      - media_volume:/app/media
     env_file:
       - .env
     depends_on:
       - db
       - redis
     restart: unless-stopped
-    # Запускаем воркер от имени нашего пользователя
     user: appuser
 
   # Мониторинг Celery через Flower
   flower:
-    build: .
+    build:
+      context: .
+      target: flower # Используем специальную, минимальную стадию 'flower'
     container_name: psyai_flower
     command: celery -A config flower
     volumes:
@@ -65,8 +76,9 @@ services:
     depends_on:
       - redis
     restart: unless-stopped
-    # Запускаем flower от имени нашего пользователя
     user: appuser
 
+# Определяем наши именованные тома здесь
 volumes:
   postgres_data:
+  media_volume:

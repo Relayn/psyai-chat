@@ -1,56 +1,82 @@
-# Используем официальный образ Python
-FROM python:3.13-slim
+# --- СТАДИЯ 1: Сборщик зависимостей ---
+# На этой стадии мы используем Poetry только для генерации requirements.txt.
+# Используем полный образ, чтобы у Poetry точно были все инструменты.
+FROM python:3.13 AS builder
 
-# Устанавливаем переменные окружения, чтобы избежать лишних логов и проблем с буферизацией
+# Устанавливаем конкретную современную версию Poetry, чтобы избежать проблем со старыми командами
+RUN pip install poetry==1.8.2
+
+WORKDIR /app
+COPY poetry.lock pyproject.toml ./
+
+# Генерируем requirements.txt для основного приложения (app, worker)
+# ИСПОЛЬЗУЕМ `python -m poetry`, чтобы гарантированно вызвать нужную версию
+RUN python -m poetry export -f requirements.txt --output requirements.txt --without dev
+
+# Генерируем requirements.txt для Flower
+# ИСПОЛЬЗУЕМ `python -m poetry`, чтобы гарантированно вызвать нужную версию
+RUN python -m poetry export -f requirements.txt --output flower-requirements.txt --with monitoring --without dev
+
+
+# --- СТАДИЯ 2: Финальный образ для App и Worker ---
+# Возвращаемся к slim-образу для экономии места
+FROM python:3.13-slim AS app
+
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# --- Оптимизированный блок установки зависимостей ---
-# Объединяем все команды в один RUN, чтобы создать единый слой.
-# 1. Обновляем списки пакетов.
-# 2. Устанавливаем системные зависимости, необходимые для сборки (build-essential) и работы (libpq-dev).
-# 3. Устанавливаем Poetry.
-# 4. Очищаем кэш apt, чтобы уменьшить размер итогового образа.
+# Устанавливаем только необходимые для работы системные зависимости
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends build-essential libpq-dev && \
-    pip install poetry && \
-    apt-get clean && \
+    apt-get install -y --no-install-recommends libpq-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Копируем только файлы с зависимостями.
-# Это позволяет Docker кэшировать этот слой. Если pyproject.toml и poetry.lock не менялись,
-# Docker не будет переустанавливать зависимости при каждой сборке.
-COPY poetry.lock pyproject.toml /app/
+# Копируем сгенерированный requirements.txt из сборщика
+COPY --from=builder /app/requirements.txt .
 
-# Устанавливаем зависимости проекта с помощью Poetry.
-# --no-root: не устанавливать сам проект как пакет.
-# virtualenvs.create false: устанавливать зависимости в системный python, а не в .venv.
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-root --no-interaction --no-ansi
+# Устанавливаем зависимости через pip, что быстрее и надежнее в Docker
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем весь остальной код проекта в контейнер.
-# Этот слой будет пересобираться только при изменении кода.
-COPY . /app/
+# Копируем код приложения
+COPY . .
 
-# --- Оптимизированный блок создания пользователя и прав доступа ---
-# Объединяем все команды в один RUN для создания одного слоя.
-# 1. Создаем системную группу и пользователя без домашней директории.
-# 2. Создаем папки для медиа и статики.
-# 3. Меняем владельца всех файлов в /app на нашего непривилегированного пользователя.
+# Создаем непривилегированного пользователя для безопасности
 RUN addgroup --system appuser && \
     adduser --system --ingroup appuser appuser && \
     mkdir -p /app/media /app/staticfiles && \
     chown -R appuser:appuser /app
 
-# Переключаемся на непривилегированного пользователя для повышения безопасности.
-# Все последующие команды будут выполняться от его имени.
 USER appuser
-
-# Открываем порт, который будет использовать Django
 EXPOSE 8000
 
-# Команда для запуска приложения
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]
+
+# --- СТАДИЯ 3: Финальный образ для Flower ---
+FROM python:3.13-slim AS flower
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /app
+
+# Устанавливаем системные зависимости
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Копируем сгенерированный requirements.txt для Flower
+COPY --from=builder /app/flower-requirements.txt .
+
+# Устанавливаем зависимости
+RUN pip install --no-cache-dir -r flower-requirements.txt
+
+# Копируем код приложения
+COPY . .
+
+# Создаем пользователя
+RUN addgroup --system appuser && \
+    adduser --system --ingroup appuser appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
+EXPOSE 5555

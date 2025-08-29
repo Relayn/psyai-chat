@@ -170,8 +170,10 @@ CHANNEL_LAYERS = {
 GPT_API_KEY = env("GPT_API_KEY")
 
 # --- 13. Настройки Celery ---
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://redis:6379/0")
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://redis:6379/0")
+# Используем ту же переменную, что и для Channels, для унификации.
+REDIS_URL = env("REDIS_URL", default="redis://redis:6379/0")
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"

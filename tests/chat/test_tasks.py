@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -33,8 +33,8 @@ def test_process_gpt_request_success(
     # Arrange
     mock_get_gpt_response.return_value = "Это тестовый ответ от ИИ."
     mock_channel_layer = mock_get_channel_layer.return_value
-    # Заменяем метод send на полноценный мок-объект, а не на lambda
-    mock_channel_layer.send = MagicMock()
+    # Заменяем метод send на асинхронный мок, чтобы избежать UserWarning
+    mock_channel_layer.send = AsyncMock()
 
     # Act
     process_gpt_request(chat_session.id, "Привет, ИИ!", "test_channel")

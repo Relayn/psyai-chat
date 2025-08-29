@@ -1,69 +1,53 @@
 from django.conf import settings
 from django.db import models
 
+from users.models import User
+
 
 class ChatSession(models.Model):
-    """
-    Модель сессии чата.
-
-    Хранит информацию о каждой отдельной сессии чата между
-    пользователем и ИИ.
-
-    Attributes:
-        user (ForeignKey): Ссылка на пользователя, начавшего сессию.
-        start_time (DateTimeField): Время начала сессии.
-        message_count (PositiveIntegerField): Количество сообщений в сессии.
-    """
-
-    user = models.ForeignKey(
+    id: int
+    user: models.ForeignKey = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="chat_sessions",
         verbose_name="Пользователь",
     )
-    start_time = models.DateTimeField(auto_now_add=True, verbose_name="Время начала")
-    message_count = models.PositiveIntegerField(
+    start_time: models.DateTimeField = models.DateTimeField(
+        auto_now_add=True, verbose_name="Время начала"
+    )
+    message_count: models.PositiveIntegerField = models.PositiveIntegerField(
         default=0, verbose_name="Количество сообщений"
     )
+    messages: "models.Manager[ChatMessage]"
 
     class Meta:
         verbose_name = "Сессия чата"
         verbose_name_plural = "Сессии чата"
         ordering = ["-start_time"]
 
-    def __str__(self):
+    def __str__(self) -> str:
+        username = self.user.username if isinstance(self.user, User) else "N/A"
         start_str = self.start_time.strftime("%Y-%m-%d %H:%M")
-        return f"Сессия {self.user.username} от {start_str}"
+        return f"Сессия {username} от {start_str}"
 
 
 class ChatMessage(models.Model):
-    """
-    Модель сообщения в чате.
-
-    Хранит текст сообщения, его отправителя и время создания.
-
-    Attributes:
-        session (ForeignKey): Ссылка на сессию, к которой относится сообщение.
-        text (TextField): Текст сообщения.
-        timestamp (DateTimeField): Время отправки сообщения.
-        sender_type (CharField): Тип отправителя (Пользователь или ИИ).
-    """
-
     class SenderType(models.TextChoices):
-        """Перечисление для определения типа отправителя."""
-
         USER = "USER", "Пользователь"
         AI = "AI", "Искусственный интеллект"
 
-    session = models.ForeignKey(
+    id: int
+    session: models.ForeignKey = models.ForeignKey(
         ChatSession,
         on_delete=models.CASCADE,
         related_name="messages",
         verbose_name="Сессия",
     )
-    text = models.TextField(verbose_name="Текст сообщения")
-    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Время отправки")
-    sender_type = models.CharField(
+    text: models.TextField = models.TextField(verbose_name="Текст сообщения")
+    timestamp: models.DateTimeField = models.DateTimeField(
+        auto_now_add=True, verbose_name="Время отправки"
+    )
+    sender_type: models.CharField = models.CharField(
         max_length=4,
         choices=SenderType.choices,
         verbose_name="Тип отправителя",
@@ -74,7 +58,12 @@ class ChatMessage(models.Model):
         verbose_name_plural = "Сообщения чата"
         ordering = ["timestamp"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"{self.get_sender_type_display()} в {self.timestamp.strftime('%H:%M:%S')}"
         )
+
+    def get_sender_type_display(self) -> str:
+        # Заглушка для mypy, который не видит метод,
+        # генерируемый Django для полей с choices.
+        ...

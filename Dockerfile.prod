@@ -1,61 +1,60 @@
 # Dockerfile.prod
 
-# --- СТАДИЯ 1: Сборка зависимостей ---
-# Используем образ с Poetry для установки зависимостей
-FROM python:3.13-slim AS builder
+# --- СТАДИЯ 1: Сборщик зависимостей ---
+# Используем полный образ, чтобы у Poetry точно были все инструменты.
+FROM python:3.13 AS builder
 
-# Устанавливаем переменные окружения
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+# Устанавливаем конкретную современную версию Poetry
+RUN pip install poetry==1.8.2
 
 WORKDIR /app
-
-# Устанавливаем системные зависимости, необходимые для сборки некоторых пакетов
-RUN apt-get update && apt-get install -y build-essential libpq-dev
-
-# Копируем файлы с зависимостями
 COPY poetry.lock pyproject.toml ./
 
-# Устанавливаем зависимости проекта с помощью Poetry
-RUN pip install poetry && \
-    poetry install --no-dev --no-root && \
-    # Экспортируем зависимости в requirements.txt для использования в финальном образе
-    poetry export -f requirements.txt --output requirements.txt --without-hashes
+# Генерируем requirements.txt для основного приложения
+# ВАЖНО: --without dev исключает зависимости для разработки (pytest и т.д.)
+RUN python -m poetry export -f requirements.txt --output requirements.txt --without dev
 
 
-# --- СТАДИЯ 2: Финальный образ ---
-# Используем чистый и легковесный образ Python
-FROM python:3.13-slim
+# --- СТАДИЯ 2: Финальный образ для Production ---
+# Возвращаемся к slim-образу для экономии места
+FROM python:3.13-slim AS production
 
-# Устанавливаем переменные окружения
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+# Устанавливаем переменную окружения, чтобы Django знал, что работает в продакшене
+# Это повлияет на сбор статики и другие настройки безопасности.
+ENV DJANGO_SETTINGS_MODULE=config.settings
 
 WORKDIR /app
 
-# Устанавливаем системные зависимости, необходимые для работы приложения (только libpq)
-RUN apt-get update && apt-get install -y libpq-dev && rm -rf /var/lib/apt/lists/*
+# Устанавливаем только необходимые для работы системные зависимости
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# Копируем requirements.txt из стадии сборки
+# Копируем сгенерированный requirements.txt из сборщика
 COPY --from=builder /app/requirements.txt .
 
-# Устанавливаем зависимости с помощью pip
+# Устанавливаем зависимости через pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем весь код приложения
 COPY . .
 
-# Собираем статические файлы
-# Ключ --noinput важен для автоматической сборки
+# Создаем непривилегированного пользователя для безопасности
+RUN addgroup --system appuser && \
+    adduser --system --ingroup appuser appuser && \
+    mkdir -p /app/media /app/staticfiles && \
+    chown -R appuser:appuser /app /app/media /app/staticfiles
+
+# Переключаемся на этого пользователя
+USER appuser
+
+# Собираем статические файлы. Django использует STATIC_ROOT из settings.py
 RUN python manage.py collectstatic --noinput
 
 # Открываем порт
 EXPOSE 8000
 
-# Команда для запуска приложения
-# Используем Daphne как production-ready ASGI сервер
+# Команда для запуска приложения через Daphne (production-ready ASGI сервер)
 CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]
